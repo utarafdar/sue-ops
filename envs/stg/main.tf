@@ -50,6 +50,17 @@ module "elastic_beanstalk" {
   tags                   = { Name = "sue-stg-ha-app" }
 }
 
+# Bastion Host
+module "bastion" {
+  source           = "../../modules/bastion"
+  name             = "sue-stg-bastion"
+  vpc_id           = module.vpc.vpc_id
+  public_subnet_id = module.vpc.public_subnets[0] # Use the first public subnet
+  ami_id           = "ami-0ce8c2b29fcc8a346"
+  instance_type    = "t3.micro"
+  key_name         = "bastion-key"
+}
+
 # RDS MariaDB
 module "rds_mariadb" {
   source = "../../modules/rds_mariadb"
@@ -57,6 +68,7 @@ module "rds_mariadb" {
   name               = "sue-stg-db"
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnets
+  bastion_sg_id      = module.bastion.bastion_security_group_id
   beanstalk_sg_id    = module.elastic_beanstalk_sg.eb_instances_sg_id
 
   db_username = var.mariadb_username
@@ -64,4 +76,12 @@ module "rds_mariadb" {
 
   allocated_storage = 20
   instance_class    = "db.t3.micro"
+}
+
+# WAF Module
+module "waf" {
+  source       = "../../modules/waf"
+  name         = "sue-stg-waf"
+  description  = "WAF to block bot traffic for staging environment"
+  resource_arn = module.elastic_beanstalk.load_balancer_arn
 }

@@ -82,6 +82,20 @@ resource "aws_elastic_beanstalk_environment" "env" {
     value     = var.max_size
   }
 
+  lifecycle {
+    ignore_changes = [
+      setting, # Ignore changes to settings
+      tags     # Ignore changes to tags
+    ]
+  }
+
 
   tags = var.tags
+}
+
+# Fetch the Load Balancer by Tags
+data "aws_lb" "beanstalk_lb" {
+  tags = {
+    "elasticbeanstalk:environment-name" = aws_elastic_beanstalk_environment.env.name
+  }
 }

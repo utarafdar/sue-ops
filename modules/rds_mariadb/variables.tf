@@ -40,3 +40,8 @@ variable "instance_class" {
   description = "Instance class"
   type        = string
 }
+
+variable "bastion_sg_id" {
+  description = "Security group ID of the bastion host"
+  type        = string
+}

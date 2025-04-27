@@ -11,11 +11,20 @@ resource "aws_security_group" "rds_sg" {
   description = "Security group for RDS MariaDB"
   vpc_id      = var.vpc_id
 
+  # Allow access from Elastic Beanstalk security group
   ingress {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
     security_groups = [var.beanstalk_sg_id]
+  }
+
+  # Allow access from Bastion host security group
+  ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [var.bastion_sg_id]
   }
 
   egress {

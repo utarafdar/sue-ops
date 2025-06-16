@@ -22,15 +22,23 @@ module "vpc" {
   env                  = var.env
 }
 
-# Elastic beanstalk security groups
-module "elastic_beanstalk_sg" {
-  source = "../../modules/security_groups"
-  vpc_id = module.vpc.vpc_id
-  env    = var.env
+# Backend Elastic beanstalk security groups
+module "elastic_beanstalk_sg_backend" {
+  source      = "../../modules/security_groups"
+  vpc_id      = module.vpc.vpc_id
+  env         = var.env
+  name_prefix = "backend"
 }
 
+# Frontend Elastic Beanstalk Security Groups
+module "elastic_beanstalk_sg_frontend" {
+  source      = "../../modules/security_groups"
+  vpc_id      = module.vpc.vpc_id
+  env         = var.env
+  name_prefix = "frontend"
+}
 
-# Elastic Beanstalk Application
+# Elastic Beanstalk Application Backend
 module "elastic_beanstalk" {
   source                 = "../../modules/elastic_beanstalk"
   app_name               = "sue-stg-ha-app"
@@ -39,8 +47,8 @@ module "elastic_beanstalk" {
   solution_stack_name    = "64bit Amazon Linux 2023 v4.6.0 running PHP 8.1"
   beanstalk_service_role = "aws-elasticbeanstalk-service-role"
   ec2_instance_profile   = "aws-elasticbeanstalk-ec2-role"
-  ec2_instance_sg_ids    = [module.elastic_beanstalk_sg.eb_instances_sg_id]
-  load_balancer_sg_ids   = [module.elastic_beanstalk_sg.eb_load_balancer_sg_id]
+  ec2_instance_sg_ids    = [module.elastic_beanstalk_sg_backend.eb_instances_sg_id]
+  load_balancer_sg_ids   = [module.elastic_beanstalk_sg_backend.eb_load_balancer_sg_id]
   instance_type          = "t3.micro"
   vpc_id                 = module.vpc.vpc_id
   public_subnets         = module.vpc.public_subnets
@@ -48,6 +56,26 @@ module "elastic_beanstalk" {
   min_size               = 1
   max_size               = 2
   tags                   = { Name = "sue-stg-ha-app" }
+}
+
+# Elastic Beanstalk Application Frontend
+module "elastic_beanstalk_fe" {
+  source                 = "../../modules/elastic_beanstalk"
+  app_name               = "sue-stg-fe-app"
+  app_description        = "Staging Frontend Application"
+  env_name               = "sue-stg-fe-env"
+  solution_stack_name    = "64bit Amazon Linux 2 v4.1.2 running Docker"
+  beanstalk_service_role = "aws-elasticbeanstalk-service-role"
+  ec2_instance_profile   = "aws-elasticbeanstalk-ec2-role"
+  ec2_instance_sg_ids    = [module.elastic_beanstalk_sg_frontend.eb_instances_sg_id]
+  load_balancer_sg_ids   = [module.elastic_beanstalk_sg_frontend.eb_load_balancer_sg_id]
+  instance_type          = "t3.micro"
+  vpc_id                 = module.vpc.vpc_id
+  public_subnets         = module.vpc.public_subnets
+  private_subnets        = module.vpc.private_subnets
+  min_size               = 1
+  max_size               = 2
+  tags                   = { Name = "sue-stg-fe-app" }
 }
 
 # Bastion Host
@@ -69,7 +97,7 @@ module "rds_mariadb" {
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnets
   bastion_sg_id      = module.bastion.bastion_security_group_id
-  beanstalk_sg_id    = module.elastic_beanstalk_sg.eb_instances_sg_id
+  beanstalk_sg_id    = module.elastic_beanstalk_sg_backend.eb_instances_sg_id
 
   db_username = var.mariadb_username
   db_password = var.mariadb_password

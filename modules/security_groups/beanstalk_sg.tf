@@ -1,6 +1,6 @@
 resource "aws_security_group" "eb_load_balancer" {
-  name        = "eb_load_balancer-${var.env}-sg"
-  description = "SG for Elastic Beanstalk load balancer"
+  name        = "${var.name_prefix}-eb_load_balancer-${var.env}-sg"
+  description = "SG for Elastic Beanstalk load balancer (${var.name_prefix})"
   vpc_id      = var.vpc_id
   ingress {
     from_port   = 80
@@ -24,14 +24,14 @@ resource "aws_security_group" "eb_load_balancer" {
   }
 
   tags = {
-    Name        = "eb_load_balancer-${var.env}-sg"
+    Name        = "${var.name_prefix}-eb_load_balancer-${var.env}-sg"
     Environment = var.env
   }
 }
 
 resource "aws_security_group" "eb_instances" {
-  name        = "eb_instances-${var.env}-sg"
-  description = "SG for Beanstalk EC2 instances"
+  name        = "${var.name_prefix}-eb_instances-${var.env}-sg"
+  description = "SG for Beanstalk EC2 instances (${var.name_prefix})"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -49,7 +49,7 @@ resource "aws_security_group" "eb_instances" {
   }
 
   tags = {
-    Name        = "eb_instances-${var.env}-sg"
+    Name        = "${var.name_prefix}-eb_instances-${var.env}-sg"
     Environment = var.env
   }
 }

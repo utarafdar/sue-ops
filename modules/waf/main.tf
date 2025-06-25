@@ -23,6 +23,7 @@ resource "aws_wafv2_web_acl" "waf_acl" {
         managed_rule_group_configs {
           aws_managed_rules_bot_control_rule_set {
             inspection_level = "COMMON"
+            enable_machine_learning = true
           }
         }
       }
@@ -39,6 +40,12 @@ resource "aws_wafv2_web_acl" "waf_acl" {
     cloudwatch_metrics_enabled = true
     metric_name                = "waf-acl"
     sampled_requests_enabled   = true
+  }
+
+  lifecycle {
+    ignore_changes = [
+      rule, # Ignore changes to the rule block
+    ]
   }
 }
 

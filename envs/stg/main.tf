@@ -44,7 +44,7 @@ module "elastic_beanstalk" {
   app_name               = "sue-stg-ha-app"
   app_description        = "Staging HA application"
   env_name               = "sue-stg-ha-env"
-  solution_stack_name    = "64bit Amazon Linux 2023 v4.6.0 running PHP 8.1"
+  solution_stack_name    = "64bit Amazon Linux 2023 v4.4.2 running PHP 8.3"
   beanstalk_service_role = "aws-elasticbeanstalk-service-role"
   ec2_instance_profile   = "aws-elasticbeanstalk-ec2-role"
   ec2_instance_sg_ids    = [module.elastic_beanstalk_sg_backend.eb_instances_sg_id]
@@ -64,7 +64,7 @@ module "elastic_beanstalk_fe" {
   app_name               = "sue-stg-fe-app"
   app_description        = "Staging Frontend Application"
   env_name               = "sue-stg-fe-env"
-  solution_stack_name    = "64bit Amazon Linux 2 v4.1.2 running Docker"
+  solution_stack_name    = "64bit Amazon Linux 2023 v4.5.1 running Docker"
   beanstalk_service_role = "aws-elasticbeanstalk-service-role"
   ec2_instance_profile   = "aws-elasticbeanstalk-ec2-role"
   ec2_instance_sg_ids    = [module.elastic_beanstalk_sg_frontend.eb_instances_sg_id]
